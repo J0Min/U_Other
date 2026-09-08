@@ -42,6 +42,7 @@ public:
 	FVector2D MovementInput;
 	
 	void Move(const FInputActionValue& value);
+	void Stay(const FInputActionValue& value);
 	
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -59,5 +60,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USkeletalMeshComponent* SkeletalMesh;
 	
-	
+	bool isPressed = false;
+	FVector pastDirection = FVector(0.f,0.f,0.f);
 };

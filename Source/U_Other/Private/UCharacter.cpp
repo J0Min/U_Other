@@ -18,7 +18,7 @@ AUCharacter::AUCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleCollision"));
-	RootComponent = Capsule;
+	SetRootComponent(Capsule);
 	Capsule->SetCapsuleSize(35.f, 90.f);
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -33,7 +33,6 @@ AUCharacter::AUCharacter()
 	SkeletalMesh->SetupAttachment(Capsule);
 	SkeletalMesh->SetRelativeRotation(FRotator(0.0f, -90.f, 0.0f));
 	SkeletalMesh->SetRelativeLocation(FVector(0.0f, 0.f, -89.0f));
-
 }
 
 // Called when the game starts or when spawned
@@ -55,16 +54,24 @@ void AUCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (Controller)
+	if (Controller && isPressed)
 	{
 		FVector right = GetActorRightVector();
 		AddActorWorldOffset(right* MovementInput.X * MoveSpeed * DeltaTime);
 	
 		FVector forward = GetActorForwardVector();
 		AddActorWorldOffset(forward * MovementInput.Y * MoveSpeed * DeltaTime);
+		
+		//yaw 값을 통한 이동방향에 따른 캐릭터 정면 이동 (degree)
+		FVector direction = MovementInput.X * right + MovementInput.Y * forward;
+		if (direction != pastDirection)
+		{
+			float targetYawRadians = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
+			SkeletalMesh->SetWorldRotation(FRotator(0.0f, targetYawRadians, 0.0f));
+		}
+		pastDirection = direction;
 	}
 }
-
 
 // Called to bind functionality to input
 void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -74,10 +81,17 @@ void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
 	Input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AUCharacter::Move);
-	Input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AUCharacter::Move);
+	Input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AUCharacter::Stay);
 }
 
 void AUCharacter::Move(const FInputActionValue& value)
 {
 	MovementInput = value.Get<FVector2D>();
+	isPressed = true;
+}
+
+void AUCharacter::Stay(const FInputActionValue& value)
+{
+	MovementInput = value.Get<FVector2D>();
+	isPressed = false;
 }
