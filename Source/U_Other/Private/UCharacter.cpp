@@ -27,7 +27,7 @@ AUCharacter::AUCharacter()
 
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	Camera->SetupAttachment(SpringArm);
+	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(Capsule);
@@ -44,7 +44,10 @@ void AUCharacter::BeginPlay()
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* inputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
 		{
-			inputSystem->AddMappingContext(IMC_UC, 0);
+			if (IMC_UC)
+			{
+				inputSystem->AddMappingContext(IMC_UC, 0);
+			}
 		}
 	}
 }
@@ -54,22 +57,14 @@ void AUCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (Controller && isPressed)
+	if (Controller)
 	{
-		FVector right = GetActorRightVector();
-		AddActorWorldOffset(right* MovementInput.X * MoveSpeed * DeltaTime);
-	
-		FVector forward = GetActorForwardVector();
-		AddActorWorldOffset(forward * MovementInput.Y * MoveSpeed * DeltaTime);
+		FVector direction = (MovementInput.X * GetActorRightVector() + MovementInput.Y * GetActorForwardVector()).GetSafeNormal();
+		AddActorWorldOffset(direction * MoveSpeed * DeltaTime, true);
 		
 		//yaw 값을 통한 이동방향에 따른 캐릭터 정면 이동 (degree)
-		FVector direction = MovementInput.X * right + MovementInput.Y * forward;
-		if (direction != pastDirection)
-		{
-			float targetYawRadians = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
-			SkeletalMesh->SetWorldRotation(FRotator(0.0f, targetYawRadians, 0.0f));
-		}
-		pastDirection = direction;
+		float targetYaw = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
+		SkeletalMesh->SetWorldRotation(FRotator(0.0f, targetYaw, 0.0f));
 	}
 }
 
@@ -79,19 +74,22 @@ void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	
-	Input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AUCharacter::Move);
-	Input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AUCharacter::Stay);
+	if (Input != nullptr)
+	{
+		if (IA_Move != nullptr)
+		{
+			Input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AUCharacter::Move);
+			Input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AUCharacter::Stay);
+		}
+	}
 }
 
 void AUCharacter::Move(const FInputActionValue& value)
 {
 	MovementInput = value.Get<FVector2D>();
-	isPressed = true;
 }
 
 void AUCharacter::Stay(const FInputActionValue& value)
 {
-	MovementInput = value.Get<FVector2D>();
-	isPressed = false;
+	MovementInput = FVector2D::ZeroVector;
 }

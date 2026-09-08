@@ -59,7 +59,4 @@ public:
 	//스켈레탈 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class USkeletalMeshComponent* SkeletalMesh;
-	
-	bool isPressed = false;
-	FVector pastDirection = FVector(0.f,0.f,0.f);
 };
