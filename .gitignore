@@ -1,0 +1,46 @@
+# Unreal Engine generated files
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+
+# IDE-generated files
+.vs/
+.idea/
+*.sln
+*.suo
+*.user
+*.userprefs
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.DotSettings.user
+
+# Build and packaging output
+Releases/
+Packages/
+FileOpenOrder/
+
+# Project documents
+Docs/
+
+# AI-generated output
+AI_Output/
+Output/
+
+# Temporary, backup, and operating-system files
+*.tmp
+*.bak
+*.old
+*.uplugin.old
+.DS_Store
+Thumbs.db
+
+# Keep these in Git:
+# Source/       C++ source code
+# Content/      Unreal assets (.uasset, .umap)
+# Config/       project configuration
+# Plugins/      plugin source and configuration
+# Build/        build settings/resources that may be required by the project
+# *.uproject    project descriptor
