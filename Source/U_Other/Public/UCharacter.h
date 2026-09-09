@@ -80,17 +80,17 @@ public:
 
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UCameraComponent* Camera;
+	class UCameraComponent* CameraComp;
 	
 	//스프링암
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class USpringArmComponent* SpringArm;
+	class USpringArmComponent* SpringArmComp;
 	
 	//캡슐
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class UCapsuleComponent* Capsule;
+	class UCapsuleComponent* CapsuleComp;
 	
 	//스켈레탈 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USkeletalMeshComponent* SkeletalMesh;
+	USkeletalMeshComponent* SkeletalMeshComp;
 };
