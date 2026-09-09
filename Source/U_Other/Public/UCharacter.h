@@ -42,6 +42,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputAction* IA_Look;
 	
+	//이동 속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentMoveSpeed;
 	
@@ -51,14 +52,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintMoveSpeed = 800.f;
 	
+	//달리기 유무
 	bool bIsDashing = false;
 	
 	FVector2D MovementInput;
-	FVector2D CameraInput;
+	
+	//스태미너
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float CurrentStamina;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float Max_Stamina = 100.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float Plus_Stamina = 20.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float Minus_Stamina = 10.f;
+	
+	//타이머
+	float CurrentTime = 0.f;
 	
 	void Move(const FInputActionValue& value);
 	void Stay(const FInputActionValue& value);
-	void Sprint(const FInputActionValue& value);
+	void Sprint();
 	void Look(const FInputActionValue& value);
 
 	//카메라

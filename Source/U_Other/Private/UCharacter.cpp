@@ -4,6 +4,7 @@
 #include "Public/UCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "VectorUtil.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -24,7 +25,6 @@ AUCharacter::AUCharacter()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(Capsule);
 	SpringArm->SetRelativeRotation(FRotator(-40.0f, 0.f, 0.0f));
-
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
@@ -36,6 +36,8 @@ AUCharacter::AUCharacter()
 	
 	// 이동 속도 초기화
 	CurrentMoveSpeed = DefaultMoveSpeed;
+	// 스태미너 초기화
+	CurrentStamina = Max_Stamina;
 	
 }
 
@@ -44,13 +46,13 @@ void AUCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (APlayerController* playerController = Cast<APlayerController>(Controller))
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* inputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(playerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			if (IMC_UC)
 			{
-				inputSystem->AddMappingContext(IMC_UC, 0);
+				InputSystem->AddMappingContext(IMC_UC, 0);
 			}
 		}
 	}
@@ -67,12 +69,37 @@ void AUCharacter::Tick(float DeltaTime)
 		AddActorWorldOffset(direction * CurrentMoveSpeed * DeltaTime, true);
 		
 		//yaw 값을 통한 이동방향에 따른 캐릭터 정면 이동 (degree)
-		float targetYaw = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
-		SkeletalMesh->SetWorldRotation(FRotator(0.0f, targetYaw, 0.0f));
+		float TargetYaw = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
+		SkeletalMesh->SetWorldRotation(FRotator(0.0f, TargetYaw, 0.0f));
 		
 		//카메라 회전
 		SpringArm->SetWorldRotation(Controller->GetControlRotation());
+
+		//스태미나 회복
+		CurrentTime += DeltaTime;
+		if (!bIsDashing)
+		{
+			if (CurrentTime >= 1 && CurrentStamina != Max_Stamina)
+			{
+				CurrentTime = 0.f;
+				CurrentStamina = FMath::Clamp(CurrentStamina + Plus_Stamina, 0.f, Max_Stamina);
+			}
+		} //스테미나 소비
+		else
+		{
+			if (CurrentTime >= 1 && CurrentStamina > 0.0f)
+			{
+				CurrentTime = 0.f;
+				CurrentStamina = FMath::Clamp(CurrentStamina - Minus_Stamina, 0.f, Max_Stamina);
+				//강제 종료
+				if (CurrentStamina <= 0.0f)
+				{
+					Sprint();
+				}
+			}
+		}
 	}
+	GEngine->AddOnScreenDebugMessage(1,0.5f,FColor::Green,FString::Printf(TEXT("%f"),CurrentStamina));
 }
 
 // Called to bind functionality to input
@@ -109,11 +136,11 @@ void AUCharacter::Stay(const FInputActionValue& value)
 	MovementInput = FVector2D::ZeroVector;
 }
 
-void AUCharacter::Sprint(const FInputActionValue& value)
+void AUCharacter::Sprint()
 {
 	bIsDashing = !bIsDashing;
-	
-	if (bIsDashing)
+	CurrentTime = 0.f;
+	if (bIsDashing && CurrentStamina > 0.0f)
 	{
 		CurrentMoveSpeed = SprintMoveSpeed;
 	}else if (!bIsDashing)
@@ -124,7 +151,7 @@ void AUCharacter::Sprint(const FInputActionValue& value)
 
 void AUCharacter::Look(const FInputActionValue& value)
 {
-	CameraInput = value.Get<FVector2D>();
+	FVector2D CameraInput = value.Get<FVector2D>();
 	
 	if (Controller)
 	{
