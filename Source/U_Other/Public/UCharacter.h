@@ -40,22 +40,27 @@ public:
 	UInputAction* IA_Sprint;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	float CurrentMoveSpeed = 500.f;
+	UInputAction* IA_Look;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float CurrentMoveSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float DefaultMoveSpeed = 500.f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SprintMoveSpeed = 800.f;
 	
 	bool bIsDashing = false;
 	
 	FVector2D MovementInput;
+	FVector2D CameraInput;
 	
 	void Move(const FInputActionValue& value);
 	void Stay(const FInputActionValue& value);
 	void Sprint(const FInputActionValue& value);
-	
+	void Look(const FInputActionValue& value);
+
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCameraComponent* Camera;

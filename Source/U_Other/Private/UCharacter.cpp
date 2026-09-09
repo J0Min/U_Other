@@ -33,6 +33,10 @@ AUCharacter::AUCharacter()
 	SkeletalMesh->SetupAttachment(Capsule);
 	SkeletalMesh->SetRelativeRotation(FRotator(0.0f, -90.f, 0.0f));
 	SkeletalMesh->SetRelativeLocation(FVector(0.0f, 0.f, -89.0f));
+	
+	// 이동 속도 초기화
+	CurrentMoveSpeed = DefaultMoveSpeed;
+	
 }
 
 // Called when the game starts or when spawned
@@ -65,6 +69,9 @@ void AUCharacter::Tick(float DeltaTime)
 		//yaw 값을 통한 이동방향에 따른 캐릭터 정면 이동 (degree)
 		float targetYaw = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
 		SkeletalMesh->SetWorldRotation(FRotator(0.0f, targetYaw, 0.0f));
+		
+		//카메라 회전
+		SpringArm->SetWorldRotation(Controller->GetControlRotation());
 	}
 }
 
@@ -84,6 +91,10 @@ void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		if (IA_Sprint != nullptr)
 		{
 			Input->BindAction(IA_Sprint, ETriggerEvent::Started, this, &AUCharacter::Sprint);
+		}
+		if (IA_Look != nullptr)
+		{
+			Input->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AUCharacter::Look);
 		}
 	}
 }
@@ -109,5 +120,15 @@ void AUCharacter::Sprint(const FInputActionValue& value)
 	{
 		CurrentMoveSpeed = DefaultMoveSpeed;
 	}
+}
+
+void AUCharacter::Look(const FInputActionValue& value)
+{
+	CameraInput = value.Get<FVector2D>();
 	
+	if (Controller)
+	{
+		AddControllerYawInput(CameraInput.X);
+		AddControllerPitchInput(CameraInput.Y);
+	}
 }
