@@ -48,12 +48,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	float SprintMoveSpeed = 800.f;
 	
+	bool bIsDashing = false;
+	
 	FVector2D MovementInput;
 	
 	void Move(const FInputActionValue& value);
 	void Stay(const FInputActionValue& value);
-	void Sprint_Press(const FInputActionValue& value);
-	void Sprint_Comple(const FInputActionValue& value);
+	void Sprint(const FInputActionValue& value);
 	
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

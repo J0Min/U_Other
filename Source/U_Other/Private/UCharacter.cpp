@@ -83,8 +83,7 @@ void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		}
 		if (IA_Sprint != nullptr)
 		{
-			Input->BindAction(IA_Sprint, ETriggerEvent::Started, this, &AUCharacter::Sprint_Press);
-			Input->BindAction(IA_Sprint, ETriggerEvent::Completed, this, &AUCharacter::Sprint_Comple);
+			Input->BindAction(IA_Sprint, ETriggerEvent::Started, this, &AUCharacter::Sprint);
 		}
 	}
 }
@@ -99,12 +98,16 @@ void AUCharacter::Stay(const FInputActionValue& value)
 	MovementInput = FVector2D::ZeroVector;
 }
 
-void AUCharacter::Sprint_Press(const FInputActionValue& value)
+void AUCharacter::Sprint(const FInputActionValue& value)
 {
-	CurrentMoveSpeed = SprintMoveSpeed;
-}
-
-void AUCharacter::Sprint_Comple(const FInputActionValue& value)
-{
-	CurrentMoveSpeed = DefaultMoveSpeed;
+	bIsDashing = !bIsDashing;
+	
+	if (bIsDashing)
+	{
+		CurrentMoveSpeed = SprintMoveSpeed;
+	}else if (!bIsDashing)
+	{
+		CurrentMoveSpeed = DefaultMoveSpeed;
+	}
+	
 }
