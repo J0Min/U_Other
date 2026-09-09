@@ -60,7 +60,7 @@ void AUCharacter::Tick(float DeltaTime)
 	if (Controller)
 	{
 		FVector direction = (MovementInput.X * GetActorRightVector() + MovementInput.Y * GetActorForwardVector()).GetSafeNormal();
-		AddActorWorldOffset(direction * MoveSpeed * DeltaTime, true);
+		AddActorWorldOffset(direction * CurrentMoveSpeed * DeltaTime, true);
 		
 		//yaw 값을 통한 이동방향에 따른 캐릭터 정면 이동 (degree)
 		float targetYaw = FMath::RadiansToDegrees(FMath::Atan2(direction.Y, direction.X)) - 90.f;
@@ -81,6 +81,11 @@ void AUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 			Input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AUCharacter::Move);
 			Input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AUCharacter::Stay);
 		}
+		if (IA_Sprint != nullptr)
+		{
+			Input->BindAction(IA_Sprint, ETriggerEvent::Started, this, &AUCharacter::Sprint_Press);
+			Input->BindAction(IA_Sprint, ETriggerEvent::Completed, this, &AUCharacter::Sprint_Comple);
+		}
 	}
 }
 
@@ -92,4 +97,14 @@ void AUCharacter::Move(const FInputActionValue& value)
 void AUCharacter::Stay(const FInputActionValue& value)
 {
 	MovementInput = FVector2D::ZeroVector;
+}
+
+void AUCharacter::Sprint_Press(const FInputActionValue& value)
+{
+	CurrentMoveSpeed = SprintMoveSpeed;
+}
+
+void AUCharacter::Sprint_Comple(const FInputActionValue& value)
+{
+	CurrentMoveSpeed = DefaultMoveSpeed;
 }

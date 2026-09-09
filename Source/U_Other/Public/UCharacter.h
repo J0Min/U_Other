@@ -31,18 +31,29 @@ public:
 	
 	//입력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	UInputAction* IA_Move;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 	UInputMappingContext* IMC_UC;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-	float MoveSpeed = 500.f;
+	UInputAction* IA_Move;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	UInputAction* IA_Sprint;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float CurrentMoveSpeed = 500.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float DefaultMoveSpeed = 500.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+	float SprintMoveSpeed = 800.f;
 	
 	FVector2D MovementInput;
 	
 	void Move(const FInputActionValue& value);
 	void Stay(const FInputActionValue& value);
+	void Sprint_Press(const FInputActionValue& value);
+	void Sprint_Comple(const FInputActionValue& value);
 	
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -58,5 +69,5 @@ public:
 	
 	//스켈레탈 메쉬
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	class USkeletalMeshComponent* SkeletalMesh;
+	USkeletalMeshComponent* SkeletalMesh;
 };
