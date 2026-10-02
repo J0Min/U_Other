@@ -91,7 +91,22 @@ void AU_OtherCharacter::Look(const FInputActionValue& Value)
 }
 
 void AU_OtherCharacter::DoMove(float Right, float Forward)
-{
+{    
+	// 예시 값: 튜토리얼에서 설정한 값으로 맞추세요.
+	const float RunScaleThreshold = 0.5f;
+	const float RunScale = 1.0f;
+	const float WalkScale = 0.5f;
+
+	const FVector2D InputScale(Right, Forward);
+
+	const float Scale = InputScale.Size() > RunScaleThreshold
+		? RunScale
+		: WalkScale;
+
+	const FVector2D ScaledInput = InputScale.GetSafeNormal() * Scale;
+
+	Right = ScaledInput.X;
+	Forward = ScaledInput.Y;
 	if (GetController() != nullptr)
 	{
 		// find out which way is forward
